@@ -9197,6 +9197,72 @@ function validateMandatoryImages(sectionID) {
 
 
 
+function showLoader(show) {
+  const loader = document.getElementById("loader");
+  if (loader) loader.style.display = show ? "flex" : "none";
+}
+
+function showMessage(text) {
+  const box = document.getElementById("messageBox");
+  const content = document.querySelector(".message-content");
+  if (box && content) {
+    content.textContent = text;
+    box.style.display = "flex";
+    setTimeout(() => {
+      box.style.display = "none";
+    }, 3000);
+  } else {
+    alert(text);
+  }
+}
+
+
+
+
+async function checkForUpdates() {
+
+  if (!navigator.onLine)
+
+  {
+    showMessage("No internet Connection.");
+    return;
+  }
+
+  showLoader(true);
+  try{
+    const res = await fetch("update_version.php");
+    const data = await res.json();
+
+    showLoader(false);
+    if (data.status === "updated"){
+
+      showMessage("Software updated successfully");
+      setTimeout(() => location.reload(),1500);
+    }
+    else if(data.status === "uptodate"){
+      showMessage("Already upto Date");
+    }
+    else{
+      console.log(data); // 👈 IMPORTANT
+      showMessage("Update Failed: " + (data.step || ""));
+    }
+  }
+  catch(err){
+    showLoader(false);
+    showMessage("Error connecting to server")
+  }
+
+
+}
+
+// Automatically check for updates when internet connection is restored
+window.addEventListener('online', checkForUpdates);
+
+// Also check immediately when the page loads if already online
+if (navigator.onLine) {
+  checkForUpdates();
+}
+
 
 // Function to ensure only one checkbox is selected at a time for a given group
 function onlyOneChecked(checkbox, groupClass) {
